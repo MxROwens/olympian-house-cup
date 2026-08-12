@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Middle School House Cup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="hero">
+    <div class="greek-key"></div>
+    <p class="eyebrow">Middle School</p>
+    <h1>The Olympian House Cup</h1>
+    <p class="subtitle">Courage. Wisdom. Ingenuity. Transformation.</p>
+    <a class="teacher-link" href="teacher.html">Teacher Login</a>
+  </header>
+
+  <main class="container">
+    <section class="champion-panel" id="championPanel">
+      <div>
+        <span class="small-label">CURRENT CHAMPION</span>
+        <h2 id="championName">Loading standings…</h2>
+        <p id="championPoints"></p>
+      </div>
+      <div class="trophy">🏆</div>
+    </section>
+
+    <section>
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">THE FOUR HOUSES</p>
+          <h2>House Standings</h2>
+        </div>
+        <p class="updated" id="updatedTime"></p>
+      </div>
+
+      <div class="house-grid" id="houseGrid"></div>
+    </section>
+
+    <section class="activity-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">THE CHRONICLE</p>
+          <h2>Recent House Activity</h2>
+        </div>
+      </div>
+      <div id="activityFeed" class="activity-feed"></div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="greek-key"></div>
+    <p>May the finest house rise.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
