@@ -1,84 +1,9 @@
-const configured = !SUPABASE_URL.includes("YOUR_") && !SUPABASE_ANON_KEY.includes("YOUR_");
-const db = configured ? supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
-
-const demoScores = { odysseus: 0, achilles: 0, circe: 0, athena: 0 };
-
-function renderStandings(scores) {
-  const ordered = Object.entries(HOUSE_META)
-    .map(([id, meta]) => ({ id, ...meta, points: scores[id] || 0 }))
-    .sort((a,b) => b.points - a.points);
-
-  document.getElementById("houseGrid").innerHTML = ordered.map((h, i) => `
-    <article class="house-card" style="--house:${h.color}">
-      <div class="rank">${i+1}</div>
-      <div class="symbol">${h.symbol}</div>
-      <h3>${h.name}</h3>
-      <div class="traits">${h.traits}</div>
-      <div class="score">${h.points.toLocaleString()}</div>
-      <div class="score-label">House Points</div>
-    </article>
-  `).join("");
-
-  const champ = ordered[0];
-  document.getElementById("championName").textContent = champ.name;
-  document.getElementById("championPoints").textContent = `${champ.points.toLocaleString()} points`;
-  document.getElementById("updatedTime").textContent =
-    `Updated ${new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})}`;
-}
-
-function renderActivity(rows) {
-  const feed = document.getElementById("activityFeed");
-  if (!rows.length) {
-    feed.innerHTML = `<div class="activity-item"><div></div><div class="activity-main"><strong>No activity yet.</strong><span class="activity-meta">The first decree awaits.</span></div></div>`;
-    return;
-  }
-
-  feed.innerHTML = rows.map(r => {
-    const meta = HOUSE_META[r.house_id] || { name: r.house_id };
-    const sign = r.points > 0 ? "+" : "";
-    const when = new Date(r.created_at).toLocaleString([], {month:"short", day:"numeric", hour:"numeric", minute:"2-digit"});
-    return `
-      <div class="activity-item">
-        <div class="activity-points ${r.points < 0 ? "negative" : ""}">${sign}${r.points}</div>
-        <div class="activity-main">
-          <strong>${meta.name}</strong>
-          <span class="activity-meta">${r.reason} • ${when}</span>
-        </div>
-        <div class="activity-teacher">${r.points >= 0 ? "Awarded" : "Deducted"} by ${r.teacher_name}</div>
-      </div>
-    `;
-  }).join("");
-}
-
-async function loadPublicBoard() {
-  if (!configured) {
-    renderStandings(demoScores);
-    renderActivity([]);
-    return;
-  }
-
-  const { data, error } = await db
-    .from("point_transactions")
-    .select("house_id, points, reason, teacher_name, created_at")
-    .order("created_at", { ascending: false });
-
-  if (error) {
-    console.error(error);
-    renderStandings(demoScores);
-    renderActivity([]);
-    return;
-  }
-
-  const scores = { ...demoScores };
-  data.forEach(r => scores[r.house_id] = (scores[r.house_id] || 0) + r.points);
-  renderStandings(scores);
-  renderActivity(data.slice(0, 12));
-}
-
-loadPublicBoard();
-
-if (configured) {
-  db.channel("house-scoreboard")
-    .on("postgres_changes", { event:"*", schema:"public", table:"point_transactions" }, loadPublicBoard)
-    .subscribe();
-}
+const configured=!SUPABASE_URL.includes("YOUR_")&&!SUPABASE_ANON_KEY.includes("YOUR_");const db=configured?supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;const blank=()=>({odysseus:0,achilles:0,circe:0,athena:0});
+function monday(){const d=new Date(),x=(d.getDay()+6)%7;d.setHours(0,0,0,0);d.setDate(d.getDate()-x);return d}
+function order(s){return Object.entries(HOUSE_META).map(([id,m])=>({id,...m,points:s[id]||0})).sort((a,b)=>b.points-a.points)}
+function countdown(){const t=new Date(2027,4,13,8),n=new Date(),d=Math.max(0,Math.ceil((t-n)/86400000));let p=`${d} days until the House Cup Champion is crowned`;if(d===0)p="The House Cup Champion will be crowned today!";else if(d<=7)p=`Final Week • ${d} day${d===1?"":"s"} remain`;else if(d<=30)p=`Final Stretch • ${d} days remain`;document.getElementById("countdown").textContent=p}
+function render(s,w){const a=order(s),q=order(w);houseGrid.innerHTML=a.map((h,i)=>`<article class="house-card house-${h.id}" style="--house:${h.color}"><div class="house-glow"></div><div class="rank">${i+1}</div><div class="crest-wrap"><div class="crest"><div class="crest-symbol">${h.symbol}</div></div><div class="crest-ribbon">${h.name.replace("House of ","")}</div></div><h3>${h.name}</h3><div class="traits">${h.traits}</div><p class="motto">“${h.motto}”</p><div class="score-block"><div class="score">${h.points}</div><div class="score-label">Overall Points</div></div><div class="weekly-score">This week <strong>${w[h.id]||0}</strong></div></article>`).join("");championName.textContent=a[0].name;championPoints.textContent=`${a[0].points} overall points`;weeklyChampionName.textContent=q[0].name;weeklyChampionPoints.textContent=`${q[0].points} points since Monday`;updatedTime.textContent=`Updated ${new Date().toLocaleTimeString([],{hour:"numeric",minute:"2-digit"})}`;race(a)}
+function race(a){const mx=Math.max(...a.map(h=>h.points),1),mn=Math.min(...a.map(h=>h.points));raceTracks.innerHTML=a.map(h=>{const p=mx===mn?52:25+(h.points-mn)/(mx-mn)*60;return `<div class="race-row"><span class="race-name">${h.symbol} ${h.name.replace("House of ","")}</span><div class="race-line"><span class="racer" style="left:${p}%;--house:${h.color}">${h.symbol}</span></div><strong>${h.points}</strong></div>`}).join("")}
+function activity(rows){activityFeed.innerHTML=rows.length?rows.map(r=>{const h=HOUSE_META[r.house_id],sg=r.points>0?"+":"",tm=new Date(r.created_at).toLocaleString([],{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});return `<div class="activity-item ${r.points<0?"deduction":""}"><div class="activity-points ${r.points<0?"negative":""}">${sg}${r.points}</div><div class="activity-main"><strong>${h.name}</strong><span class="activity-meta">${r.reason} • ${tm}</span></div><div class="activity-teacher">${r.points>=0?"Awarded":"Deducted"} by ${r.teacher_name}</div></div>`}).join(""):'<div class="activity-item"><div></div><div><strong>No activity yet.</strong></div></div>'}
+async function load(){countdown();if(!configured){render(blank(),blank());activity([]);return}const {data,error}=await db.from("point_transactions").select("house_id,points,reason,teacher_name,created_at").order("created_at",{ascending:false});if(error)return console.error(error);const s=blank(),w=blank(),m=monday();data.forEach(r=>{s[r.house_id]+=r.points;if(new Date(r.created_at)>=m)w[r.house_id]+=r.points});render(s,w);activity(data.slice(0,12))}
+load();if(configured)db.channel("house-scoreboard").on("postgres_changes",{event:"*",schema:"public",table:"point_transactions"},load).subscribe();
